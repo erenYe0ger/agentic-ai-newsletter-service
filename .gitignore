@@ -1,0 +1,42 @@
+# ---- Python ----
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+*.tmp
+*.log
+
+# ---- Virtual Environment ----
+.venv/
+env/
+venv/
+
+# ---- Environment Files ----
+.env
+.env.local
+.env.*.local
+
+# DO upload example.env
+!example.env
+
+# ---- UV / Build Artifacts ----
+uv.lock
+dist/
+build/
+*.egg-info/
+
+# ---- IDE Folders ----
+.vscode/
+.idea/
+
+# ---- OS files ----
+.DS_Store
+Thumbs.db
+
+# ---- Cache ----
+.cache/
+.pytest_cache/
+
+# ---- Docker ----
+docker-data/

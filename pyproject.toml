@@ -1,0 +1,16 @@
+[project]
+name = "agentic-ai-newsletter-service"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "dotenv>=0.9.9",
+    "feedparser>=6.0.12",
+    "httpx>=0.28.1",
+    "huggingface-hub>=1.5.0",
+    "psycopg2>=2.9.11",
+    "requests>=2.32.5",
+    "sqlalchemy>=2.0.48",
+    "trafilatura>=2.0.0",
+]
