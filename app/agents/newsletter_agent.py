@@ -35,6 +35,12 @@ class NewsletterAgent:
             score = rank_agent.score(article)
             article["score"] = score
 
+            # Skip duplicates
+            exists = db.query(Article).filter_by(link=item["link"]).first()
+            if exists:
+                print("[Pipeline] Skipping duplicate:", item["title"])
+                continue
+
             db_obj = Article(
                 title=article["title"],
                 link=article["link"],
@@ -49,9 +55,6 @@ class NewsletterAgent:
         processed.sort(key=lambda x: x["score"], reverse=True)
         top5 = processed[:5]
 
-        EmailAgent().send(
-            to_email=os.getenv("EMAIL_ADDRESS"),
-            articles=top5
-        )
+        EmailAgent().send(top5)
 
         print("[NewsletterAgent] Completed.")
