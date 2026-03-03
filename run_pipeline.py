@@ -1,6 +1,5 @@
 import subprocess
 import sys
-import os
 import time
 
 def log(msg):
@@ -8,7 +7,6 @@ def log(msg):
 
 
 def run(cmd):
-    """Run a shell command with real-time output."""
     try:
         result = subprocess.run(
             cmd,
@@ -26,18 +24,17 @@ def run(cmd):
 def main():
 
     log("STEP 1 — Starting Docker Postgres")
-
     run("docker compose -f docker/docker-compose.yml up -d")
     time.sleep(2)
 
     log("STEP 2 — Initializing Database Tables")
     run("uv run app/db/init_db.py")
 
-    log("STEP 3 — Running Full Pipeline (Scrape → Extract → Summarize → Insert)")
-    run("uv run -m app.tests.test_pipeline")
+    log("STEP 3 — Running Full Newsletter Agent (Scrape → Extract → Summarize → Rank → Email)")
+    run("uv run main.py")
 
-    log("🎉 DONE — Pipeline completed successfully!")
+    log("🎉 DONE — Newsletter Pipeline Completed Successfully!")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

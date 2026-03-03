@@ -1,6 +1,4 @@
-def main():
-    print("Hello from agentic-ai-newsletter-service!")
-
+from app.agents.newsletter_agent import NewsletterAgent
 
 if __name__ == "__main__":
-    main()
+    NewsletterAgent().run()
