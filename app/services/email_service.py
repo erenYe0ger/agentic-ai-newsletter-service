@@ -5,14 +5,28 @@ import os
 
 load_dotenv()
 
+
 class EmailService:
-    def send_email(self, to_email: str, subject: str, html_content: str):
+    """
+    Service responsible for sending emails via SMTP.
+    Contains only email transport logic.
+    """
+
+    def send_email(self, to_email: str, subject: str, html_content: str) -> None:
+
         msg = MIMEText(html_content, "html")
         msg["Subject"] = subject
         msg["From"] = os.getenv("EMAIL_ADDRESS")
         msg["To"] = to_email
 
+        # Connect to Gmail SMTP server
         with smtplib.SMTP("smtp.gmail.com", 587) as smtp:
             smtp.starttls()
-            smtp.login(os.getenv("EMAIL_ADDRESS"), os.getenv("EMAIL_APP_PASSWORD"))
+
+            # Authenticate using app password
+            smtp.login(
+                os.getenv("EMAIL_ADDRESS"),
+                os.getenv("EMAIL_APP_PASSWORD")
+            )
+
             smtp.send_message(msg)

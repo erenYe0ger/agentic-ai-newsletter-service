@@ -41,6 +41,5 @@ Thumbs.db
 # ---- Docker ----
 docker-data/
 
-# --- recipients mails ----
+# --- config files ----
 app/config/recipients.json
-app/config/models.json

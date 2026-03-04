@@ -1,9 +1,19 @@
 from app.services.summarizer_service import SummarizerService
 
-class SummarizationAgent:
-    def __init__(self):
-        self.s = SummarizerService()
 
-    def run(self, text: str):
+class SummarizationAgent:
+    """
+    Agent responsible for generating article summaries.
+
+    Delegates summarization logic to SummarizerService.
+    """
+
+    def __init__(self):
+        self.summarizer = SummarizerService()
+
+    def run(self, text: str) -> str:
+        """
+        Generate summary for extracted article text.
+        """
         print("[SummarizationAgent] Summarizing...")
-        return self.s.summarize(text)
+        return self.summarizer.summarize(text)

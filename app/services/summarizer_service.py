@@ -3,21 +3,35 @@ from dotenv import load_dotenv
 import os
 import json
 
+# Load environment variables
 load_dotenv()
 
 
 class SummarizerService:
+    """
+    Service responsible for generating article summaries
+    using HuggingFace Inference API.
+
+    Implements automatic model fallback if a model fails.
+    """
 
     def __init__(self):
-        self.client = InferenceClient(api_key=os.getenv("HF_API_TOKEN"))
 
-        # Load model list dynamically
-        with open("app/config/models.json", "r") as f:
-            data = json.load(f)
+        # Initialize HuggingFace inference client
+        self.client = InferenceClient(
+            api_key=os.getenv("HF_API_TOKEN")
+        )
 
-        self.models = data["models"]
+        from app.services.model_discovery_service import ModelDiscoveryService
 
-    def summarize(self, text: str):
+        self.models = ModelDiscoveryService().fetch_models()
+
+    def summarize(self, text: str) -> str:
+        """
+        Generate a short summary of the article.
+
+        Tries multiple models sequentially until one succeeds.
+        """
 
         messages = [
             {
@@ -36,8 +50,10 @@ class SummarizerService:
             },
         ]
 
+        # Try each model until one succeeds
         for model in self.models:
             try:
+
                 out = self.client.chat_completion(
                     model=model,
                     messages=messages,
@@ -51,7 +67,8 @@ class SummarizerService:
                     return summary
 
             except Exception:
+                # silently fallback to next model
                 continue
 
-        # fallback if all models fail
+        # If all models fail
         return "Summary unavailable."

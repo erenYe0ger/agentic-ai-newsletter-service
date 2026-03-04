@@ -1,61 +1,96 @@
-# Agentic AI Newsletter Service
+# 🤖 Agentic AI Newsletter Service
 
-A fully automated, agentic pipeline that collects technology news, extracts article content, summarizes it using a HuggingFace LLM, and stores it in a PostgreSQL database running inside Docker. This project is built using modern Python practices (UV, pyproject.toml, modular architecture) and is designed to evolve into a personalized daily AI-driven newsletter.
+**Agentic AI Newsletter Service** is an automated pipeline that collects the latest tech and AI news, summarizes articles using large language models, ranks them by relevance, and delivers a curated daily newsletter via email. 📬
+
+> The system runs fully autonomously and transforms raw web content into a concise, structured daily digest. 🚀
 
 ---
 
-## 🚀 Current Features (Completed Milestone)
+## 🌟 Overview
 
-### ✔ RSS Scraping  
-Fetches fresh technology news articles from TechCrunch via RSS.
+This project implements an **agent-driven information pipeline** that automatically curates relevant tech and AI news.
 
-### ✔ HTML Content Extraction  
-Scrapes article pages and extracts clean text (no ads, no related posts, no junk).
+The pipeline performs the following steps:
 
-### ✔ LLM Summarization  
-Summarizes extracted content using a free-tier HuggingFace model (`Qwen/Qwen2.5-72B-Instruct`).
+1. 🛰 **Fetch** articles from RSS feeds
+2. 📄 **Extract** full article content from webpages
+3. 🧠 **Generate** concise summaries using LLMs
+4. 📊 **Rank** articles based on semantic similarity to AI topics
+5. 🗄 **Store** processed articles in PostgreSQL
+6. 📧 **Deliver** the top articles as a styled HTML newsletter
 
-### ✔ PostgreSQL + Docker  
-Fully working database setup:
-- Docker-managed PostgreSQL instance  
-- SQLAlchemy ORM models  
-- Automatic table creation  
-- Inserted articles saved successfully  
-
-### ✔ End-to-End Automated Pipeline  
-A single command runs:
-1. Start Docker Postgres  
-2. Initialize DB  
-3. Scrape articles  
-4. Extract content  
-5. Summarize  
-6. Insert to DB  
+The result is a fully automated **AI-powered information curation system**. 🛠️
 
 ---
 
 ## 🛠 Tech Stack
 
-- **Python 3.13+**
-- **UV** (pyproject-based dependency + env management)
-- **SQLAlchemy** (ORM)
-- **PostgreSQL** (Docker)
-- **HuggingFace Inference API**
-- **Requests / Feedparser / BeautifulSoup**
-- **Modular Service Architecture**
-- **VS Code**
+### ⚙️ Backend
+- **Language:** Python 🐍
+
+### 🧠 AI / NLP
+- **Inference:** HuggingFace Inference API 🤗
+- **Embeddings:** SentenceTransformers
+
+### 🕸 Data Processing
+- **Parsing:** BeautifulSoup 🥣
+- **Feeds:** Feedparser
+
+### 🗄 Database
+- **Engine:** PostgreSQL 🐘
+- **ORM:** SQLAlchemy
+
+### 🏗 Infrastructure
+- **Containerization:** Docker 🐳
+- **Environment:** UV (Python environment manager) ⚡
+
+### 📧 Email Delivery
+- **Protocol:** SMTP
 
 ---
 
-## 🎯 Next Steps (Upcoming Phases)
+## 🚀 Running the Project
 
-- Multi-source scraping (The Verge, Ars Technica, Wired)
-- Email formatter & daily digest emails
-- User profile → personalized ranking system
-- Render deployment + cron scheduler
-- Robust logging + monitoring
-- Alembic migrations
+### 1️⃣ Clone the repository
+```bash
+git clone https://github.com/erenYe0ger/agentic-ai-newsletter-service.git
+cd agentic-ai-newsletter-service
+```
 
+### 2️⃣ Create a .env file
+```text
+DATABASE_URL=postgresql://user:password@localhost:5432/tech_news
+HF_API_TOKEN=your_huggingface_token
+EMAIL_ADDRESS=your_email
+EMAIL_APP_PASSWORD=your_email_app_password
+```
+
+### 3️⃣ Run the pipeline
+```bash
+uv run main.py
+```
+
+The pipeline will automatically:
+- ✅ Start PostgreSQL via Docker
+- ✅ Initialize database tables
+- ✅ Fetch articles from RSS feeds
+- ✅ Extract article content
+- ✅ Generate AI summaries
+- ✅ Rank articles by relevance
+- ✅ Send the newsletter email
 
 ---
 
-This is the foundational milestone: **the entire ingestion & summarization pipeline is fully operational.**
+## 📤 Output
+
+Each newsletter email contains:
+- 📌 **Curated article titles**
+- 📝 **AI-generated summaries**
+- 🔗 **Links to the original articles**
+- 🔥 **The most relevant AI and tech news of the day**
+
+*All emails are delivered using a clean HTML newsletter layout.* ✨
+
+---
+
+**Author:** [Goutam Mukherjee](https://github.com/erenYe0ger) ✍️

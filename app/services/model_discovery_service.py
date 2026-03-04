@@ -1,52 +1,40 @@
 import requests
 import os
-import json
 from dotenv import load_dotenv
 
 load_dotenv()
 
-HF_TOKEN = os.getenv("HF_API_TOKEN")
 
 class ModelDiscoveryService:
+    """
+    Discovers available HuggingFace inference models at runtime
+    and returns only chat-capable LLMs suitable for summarization.
+    """
 
-    URL = "https://router.huggingface.co/v1/models"
+    def __init__(self):
+        self.hf_token = os.getenv("HF_API_TOKEN")
+        self.url = "https://router.huggingface.co/v1/models"
 
-    KEYWORDS = [
-        "instruct",
-        "chat",
-        "it",
-    ]
+        # Keywords indicating instruction/chat-tuned models
+        self.keywords = ["instruct", "chat", "it"]
 
-    def fetch_models(self):
-        headers = {"Authorization": f"Bearer {HF_TOKEN}"}
-        r = requests.get(self.URL, headers=headers, timeout=20)
+    def fetch_models(self) -> list[str]:
+        """Fetch models from HF router and filter usable ones."""
 
-        if r.status_code != 200:
-            print("HF model fetch failed")
-            return []
+        headers = {"Authorization": f"Bearer {self.hf_token}"}
+        response = requests.get(self.url, headers=headers, timeout=20)
 
-        data = r.json().get("data", [])
+        if response.status_code != 200:
+            raise RuntimeError("Failed to fetch HF models")
 
-        models = []
+        data = response.json().get("data", [])
 
-        for m in data:
-            mid = m["id"].lower()
+        # Keep only models likely to support chat completion
+        models = [
+            m["id"]
+            for m in data
+            if any(k in m["id"].lower() for k in self.keywords)
+        ]
 
-            if any(k in mid for k in self.KEYWORDS):
-                models.append(m["id"])
-
-        return models
-
-    def save_models(self, path="app/config/models.json"):
-        models = self.fetch_models()
-
-        if not models:
-            print("No models discovered")
-            return
-
-        os.makedirs("app/config", exist_ok=True)
-
-        with open(path, "w") as f:
-            json.dump({"models": models}, f, indent=2)
-
-        print(f"Saved {len(models)} models to {path}")
+        # Limit list to avoid long fallback loops
+        return models[:25]
