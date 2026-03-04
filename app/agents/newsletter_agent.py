@@ -5,55 +5,60 @@ from app.agents.scraping_agent import ScrapingAgent
 from app.agents.summarization_agent import SummarizationAgent
 from app.agents.ranking_agent import RankingAgent
 from app.agents.email_agent import EmailAgent
-from app.user.profile import USER_PROFILE
-import os
+
 
 class NewsletterAgent:
+
     def run(self):
         db = SessionLocal()
 
-        scrape = ScrapingAgent().run()
+        scraper = ScrapingAgent()
         extractor = ExtractorService()
         summarizer = SummarizationAgent()
-        rank_agent = RankingAgent(USER_PROFILE["interests"])
+        rank_agent = RankingAgent()
+
+        scraped_items = scraper.run()
 
         processed = []
 
-        for item in scrape[:10]:
+        for item in scraped_items[:10]:
+
             print(f"[Pipeline] Processing: {item['title']}")
 
-            raw = extractor.extract(item["link"])
-            summary = summarizer.run(raw)
-
-            article = {
-                "title": item["title"],
-                "link": item["link"],
-                "summary": summary,
-                "full_text": raw,
-            }
-
-            score = rank_agent.score(article)
-            article["score"] = score
-
-            # Skip duplicates
+            # Skip duplicates first
             exists = db.query(Article).filter_by(link=item["link"]).first()
             if exists:
                 print("[Pipeline] Skipping duplicate:", item["title"])
                 continue
 
+            raw_text = extractor.extract(item["link"])
+
+            summary = summarizer.run(raw_text)
+
+            article = {
+                "title": item["title"],
+                "link": item["link"],
+                "summary": summary,
+                "full_text": raw_text,
+            }
+
+            # store article
             db_obj = Article(
                 title=article["title"],
                 link=article["link"],
-                full_text=raw,
+                full_text=raw_text,
                 summary=summary
             )
+
             db.add(db_obj)
             db.commit()
 
             processed.append(article)
 
-        processed.sort(key=lambda x: x["score"], reverse=True)
-        top5 = processed[:5]
+        # semantic ranking happens here
+        ranked = rank_agent.rank(processed)
+
+        top5 = ranked[:5]
 
         EmailAgent().send(top5)
 
