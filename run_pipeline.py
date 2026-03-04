@@ -30,6 +30,9 @@ def main():
     log("STEP 2 — Initializing Database Tables")
     run("uv run app/db/init_db.py")
 
+    log("STEP 2.5 — Updating Available HF Models")
+    run("uv run scripts/update_models.py")
+
     log("STEP 3 — Running Full Newsletter Agent (Scrape → Extract → Summarize → Rank → Email)")
     run("uv run main.py")
 

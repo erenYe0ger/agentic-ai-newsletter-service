@@ -43,3 +43,4 @@ docker-data/
 
 # --- recipients mails ----
 app/config/recipients.json
+app/config/models.json
