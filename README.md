@@ -57,15 +57,32 @@ git clone https://github.com/erenYe0ger/agentic-ai-newsletter-service.git
 cd agentic-ai-newsletter-service
 ```
 
-### 2️⃣ Create a .env file
+### 2️⃣ Prerequisites & Configuration
+* **Docker Desktop:** Ensure **Docker Desktop** is installed and running on your machine to host the PostgreSQL database.
+* **Email App Password:** For using Gmail, you must generate an **App Password** (not your regular password). You can do this at [Google App Passwords](https://myaccount.google.com/apppasswords).
+
+### 3️⃣ Setup config files
+Inside ```config/``` directory, add a ```recipients.json``` file to manage your mailing list:
+```json
+{
+  "recipients": [
+    "example@gmail.com",
+    "example2@gmail.com",
+    "example3@gmail.com",
+  ]
+}
+```
+
+### 4️⃣ Create a .env file
 ```text
 DATABASE_URL=postgresql://user:password@localhost:5432/tech_news
 HF_API_TOKEN=your_huggingface_token
+HF_TOKEN=your_huggingface_token
 EMAIL_ADDRESS=your_email
 EMAIL_APP_PASSWORD=your_email_app_password
 ```
 
-### 3️⃣ Run the pipeline
+### 5️⃣ Run the pipeline
 ```bash
 uv run main.py
 ```
