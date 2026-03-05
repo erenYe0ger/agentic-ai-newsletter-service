@@ -43,3 +43,6 @@ docker-data/
 
 # --- config files ----
 app/config/recipients.json
+
+# --- xtras ---
+tree.py

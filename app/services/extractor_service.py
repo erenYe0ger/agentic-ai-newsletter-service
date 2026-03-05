@@ -4,18 +4,18 @@ from bs4 import BeautifulSoup
 
 class ExtractorService:
     """
-    Service responsible for extracting article text
-    from a given webpage URL.
+    Extracts readable text from article webpages.
     """
 
-    def extract(self, url: str) -> str:
+    def extract(self, url: str):
 
-        response = requests.get(url, timeout=10)
+        r = requests.get(url, timeout=10)
 
-        soup = BeautifulSoup(response.text, "html.parser")
+        soup = BeautifulSoup(r.text, "html.parser")
 
+        # Collect paragraph text
         paragraphs = soup.find_all("p")
 
-        text = "\n".join(p.get_text() for p in paragraphs)
+        text = "\n".join([p.get_text() for p in paragraphs]).strip()
 
-        return text.strip()
+        return text

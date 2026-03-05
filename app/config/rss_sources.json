@@ -1,0 +1,9 @@
+{
+  "feeds": [
+    "https://deepmind.google/blog/rss.xml",
+    "https://blog.google/technology/ai/rss/",
+    "https://openai.com/news/rss.xml",
+    "https://huggingface.co/blog/feed.xml",
+    "https://techcrunch.com/feed/"
+  ]
+}

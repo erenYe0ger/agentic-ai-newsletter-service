@@ -1,9 +1,7 @@
 from huggingface_hub import InferenceClient
 from dotenv import load_dotenv
 import os
-import json
 
-# Load environment variables
 load_dotenv()
 
 
@@ -17,31 +15,36 @@ class SummarizerService:
 
     def __init__(self):
 
-        # Initialize HuggingFace inference client
         self.client = InferenceClient(
             api_key=os.getenv("HF_API_TOKEN")
         )
 
         from app.services.model_discovery_service import ModelDiscoveryService
-
         self.models = ModelDiscoveryService().fetch_models()
 
     def summarize(self, text: str) -> str:
         """
         Generate a short summary of the article.
 
-        Tries multiple models sequentially until one succeeds.
+        Ensures consistent fallback behavior:
+        If the model cannot summarize, returns:
+        'Summary unavailable.'
         """
 
         messages = [
             {
                 "role": "system",
                 "content": (
-                    "Summarize the following tech news article in 2-3 concise sentences. "
-                    "Write directly in plain sentences suitable for a newsletter. "
-                    "Do NOT include introductions like 'Here is the summary', "
-                    "'Summary:', or similar phrases. "
-                    "Do NOT include bullet points or headings."
+                    "You are summarizing a tech news article for a newsletter.\n\n"
+                    "Generate a concise 2-3 sentence summary.\n\n"
+                    "Rules:\n"
+                    "- Use only the provided content.\n"
+                    "- Do NOT add introductions like 'Here is the summary'.\n"
+                    "- Do NOT use bullet points.\n"
+                    "- Write plain sentences suitable for a newsletter.\n\n"
+                    "If the article content is missing or unclear, "
+                    "return exactly this text:\n"
+                    "Summary unavailable."
                 )
             },
             {
@@ -50,7 +53,6 @@ class SummarizerService:
             },
         ]
 
-        # Try each model until one succeeds
         for model in self.models:
             try:
 
@@ -63,12 +65,23 @@ class SummarizerService:
 
                 summary = out.choices[0].message.content.strip()
 
-                if summary:
-                    return summary
+                if not summary:
+                    continue
+
+                lower = summary.lower()
+
+                # Force consistent fallback
+                if (
+                    "no article provided" in lower
+                    or "no content" in lower
+                    or "not enough information" in lower
+                    or "cannot summarize" in lower
+                ):
+                    return "Summary unavailable."
+
+                return summary
 
             except Exception:
-                # silently fallback to next model
                 continue
 
-        # If all models fail
         return "Summary unavailable."
