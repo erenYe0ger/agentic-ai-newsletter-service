@@ -1,10 +1,12 @@
-def build_newsletter_html(articles: list[dict]) -> str:
+from typing import Any
+
+def build_newsletter_html(articles: list[dict[str, str]]) -> str:
     """
     Generates the HTML template for the newsletter.
     Presentation logic lives here, keeping EmailAgent clean.
     """
 
-    html = """
+    html: str = """
 <html>
 <head>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">

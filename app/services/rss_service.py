@@ -1,5 +1,6 @@
 import feedparser
 from bs4 import BeautifulSoup
+from typing import Any
 
 
 class RSSService:
@@ -10,17 +11,17 @@ class RSSService:
     article dictionaries so the pipeline stays source-agnostic.
     """
 
-    def fetch(self, url: str) -> list[dict]:
+    def fetch(self, url: str) -> list[dict[str, Any]]:
 
-        feed = feedparser.parse(url)
+        feed: Any = feedparser.parse(url)
 
-        articles = []
+        articles: list[dict[str, Any]] = []
 
         for entry in feed.entries:
 
             # RSS descriptions often contain HTML → remove tags
-            raw_description = entry.get("description", "")
-            clean_description = BeautifulSoup(
+            raw_description: str = entry.get("description", "")
+            clean_description: str = BeautifulSoup(
                 raw_description, "html.parser"
             ).get_text()
 

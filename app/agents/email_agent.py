@@ -1,6 +1,7 @@
 from app.services.email_service import EmailService
 from app.utils.email_template import build_newsletter_html
 import json
+from typing import Any
 
 
 class EmailAgent:
@@ -9,16 +10,16 @@ class EmailAgent:
     Orchestrates template generation + email delivery.
     """
 
-    def __init__(self):
-        self.mailer = EmailService()
+    def __init__(self) -> None:
+        self.mailer: EmailService = EmailService()
 
         # Load recipients from config
         with open("app/config/recipients.json", "r") as f:
-            data = json.load(f)
+            data: dict[str, Any] = json.load(f)
 
-        self.recipients = data["recipients"]
+        self.recipients: list[str] = data["recipients"]
 
-    def send(self, articles: list[dict]) -> None:
+    def send(self, articles: list[dict[str, str]]) -> None:
         """
         Generate HTML newsletter and send it to all recipients.
         """
@@ -26,7 +27,7 @@ class EmailAgent:
         print("[EmailAgent] Sending Email...")
 
         # Build newsletter HTML from template utility
-        html = build_newsletter_html(articles)
+        html: str = build_newsletter_html(articles)
 
         for email in self.recipients:
             print(f"[EmailAgent] Sending to: {email}")

@@ -14,11 +14,11 @@ os.environ["TRANSFORMERS_VERBOSITY"] = "error"
 logging.set_verbosity_error()
 
 
-def log(msg: str):
+def log(msg: str) -> None:
     print(f"\n[ 🟦 {msg} ]\n")
 
 
-def run(cmd: str):
+def run(cmd: str) -> None:
     try:
         subprocess.run(
             cmd,
@@ -32,7 +32,7 @@ def run(cmd: str):
         sys.exit(1)
 
 
-def main():
+def main() -> None:
 
     log("STEP 1 — Starting Docker Postgres")
     run("docker compose -f docker/docker-compose.yml up -d")

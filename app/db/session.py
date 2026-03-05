@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
 from dotenv import load_dotenv
 import os
 
@@ -7,14 +7,14 @@ import os
 load_dotenv()
 
 # Database connection string
-DATABASE_URL: str = os.getenv("DATABASE_URL")
+DATABASE_URL: str = os.getenv("DATABASE_URL")  # type: ignore
 
 # Create SQLAlchemy engine
 engine = create_engine(DATABASE_URL)
 
 # Session factory used throughout the application
 # Provides database sessions for queries and transactions
-SessionLocal = sessionmaker(
+SessionLocal: sessionmaker[Session] = sessionmaker(
     bind=engine,
     autocommit=False,
     autoflush=False,

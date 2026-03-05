@@ -1,6 +1,7 @@
 from huggingface_hub import InferenceClient
 from dotenv import load_dotenv
 import os
+from typing import Any
 
 load_dotenv()
 
@@ -13,14 +14,14 @@ class SummarizerService:
     Implements automatic model fallback if a model fails.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
 
-        self.client = InferenceClient(
+        self.client: InferenceClient = InferenceClient(
             api_key=os.getenv("HF_API_TOKEN")
         )
 
         from app.services.model_discovery_service import ModelDiscoveryService
-        self.models = ModelDiscoveryService().fetch_models()
+        self.models: list[str] = ModelDiscoveryService().fetch_models()
 
     def summarize(self, text: str) -> str:
         """
@@ -31,7 +32,7 @@ class SummarizerService:
         'Summary unavailable.'
         """
 
-        messages = [
+        messages: list[dict[str, str]] = [
             {
                 "role": "system",
                 "content": (
@@ -56,19 +57,19 @@ class SummarizerService:
         for model in self.models:
             try:
 
-                out = self.client.chat_completion(
+                out: Any = self.client.chat_completion(
                     model=model,
                     messages=messages,
                     max_tokens=200,
                     temperature=0.2,
                 )
 
-                summary = out.choices[0].message.content.strip()
+                summary: str = out.choices[0].message.content.strip()
 
                 if not summary:
                     continue
 
-                lower = summary.lower()
+                lower: str = summary.lower()
 
                 # Force consistent fallback
                 if (

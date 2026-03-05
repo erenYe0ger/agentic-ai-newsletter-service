@@ -1,5 +1,6 @@
 from sentence_transformers import SentenceTransformer
 import numpy as np
+import numpy.typing as npt
 
 
 class RankingService:
@@ -11,13 +12,13 @@ class RankingService:
     to prioritize important AI developments.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
 
         # Lightweight embedding model (~90MB)
-        self.model = SentenceTransformer("all-MiniLM-L6-v2")
+        self.model: SentenceTransformer = SentenceTransformer("all-MiniLM-L6-v2")
 
         # Reference context representing the type of articles we prefer
-        self.reference_text = """
+        self.reference_text: str = """
         Recent breakthroughs and research developments in artificial intelligence,
         including new machine learning models, large language models, multimodal
         models, foundation models, and advances in deep learning architectures.
@@ -33,7 +34,7 @@ class RankingService:
         """
 
         # Precompute reference embedding once
-        self.reference_embedding = self.model.encode(self.reference_text)
+        self.reference_embedding: npt.NDArray[np.float_] = self.model.encode(self.reference_text)
 
     def similarity(self, text: str) -> float:
         """
@@ -41,9 +42,9 @@ class RankingService:
         text embedding and the reference embedding.
         """
 
-        emb = self.model.encode(text)
+        emb: npt.NDArray[np.float_] = self.model.encode(text)
 
-        score = np.dot(self.reference_embedding, emb) / (
+        score: float = np.dot(self.reference_embedding, emb) / (
             np.linalg.norm(self.reference_embedding) * np.linalg.norm(emb)
         )
 

@@ -1,6 +1,8 @@
 from sqlalchemy import text
+from sqlalchemy.orm import Session
 from email.utils import parsedate_to_datetime
 import datetime
+from typing import Any
 
 
 class ArticleRepository:
@@ -12,29 +14,35 @@ class ArticleRepository:
     ranked articles.
     """
 
-    def __init__(self, db):
-        self.db = db
+    def __init__(self, db: Session) -> None:
+        self.db: Session = db
 
     def get_today_table(self) -> str:
         """
         Returns today's dynamic table name.
         Example: articles_05_03_2026
         """
-        today = datetime.datetime.now(datetime.UTC).strftime("%d_%m_%Y")
+        today: str = datetime.datetime.now(datetime.UTC).strftime("%d_%m_%Y")
         return f"articles_{today}"
 
-    def upsert_article(self, table_name: str, article: dict, score: float, published_raw: str):
+    def upsert_article(
+        self,
+        table_name: str,
+        article: dict[str, str],
+        score: float,
+        published_raw: str,
+    ) -> None:
         """
         Insert article if it does not exist.
         Otherwise update the existing record.
         """
 
         try:
-            published = parsedate_to_datetime(published_raw)
+            published: datetime.datetime | None = parsedate_to_datetime(published_raw)
         except Exception:
             published = None
 
-        exists = self.db.execute(
+        exists: Any = self.db.execute(
             text(f"SELECT id FROM {table_name} WHERE link=:link"),
             {"link": article["link"]},
         ).fetchone()
@@ -83,7 +91,7 @@ class ArticleRepository:
 
         self.db.commit()
 
-    def fetch_top_articles(self, table_name: str, limit: int = 15):
+    def fetch_top_articles(self, table_name: str, limit: int = 15) -> list[dict[str, str]]:
         """
         Fetch top ranked articles for newsletter generation.
 
@@ -92,7 +100,7 @@ class ArticleRepository:
         preference) before selecting the final 5 articles.
         """
 
-        rows = self.db.execute(
+        rows: Any = self.db.execute(
             text(
                 f"""
                 SELECT title, link, summary

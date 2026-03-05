@@ -17,11 +17,11 @@ def create_daily_articles_table() -> str:
     summary and semantic ranking score.
     """
 
-    metadata = MetaData()
+    metadata: MetaData = MetaData()
 
     # Generate today's table name
-    today = datetime.datetime.now(datetime.UTC).strftime("%d_%m_%Y")
-    table_name = f"articles_{today}"
+    today: str = datetime.datetime.now(datetime.UTC).strftime("%d_%m_%Y")
+    table_name: str = f"articles_{today}"
 
     # Define table schema
     Table(
@@ -41,11 +41,11 @@ def create_daily_articles_table() -> str:
     return table_name
 
 
-def init_db():
+def init_db() -> None:
     """
     Initialize database by ensuring today's article table exists.
     """
-    table = create_daily_articles_table()
+    table: str = create_daily_articles_table()
     print(f"Created/verified table: {table}")
 
 

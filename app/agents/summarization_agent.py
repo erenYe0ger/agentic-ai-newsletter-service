@@ -8,8 +8,8 @@ class SummarizationAgent:
     Delegates summarization logic to SummarizerService.
     """
 
-    def __init__(self):
-        self.summarizer = SummarizerService()
+    def __init__(self) -> None:
+        self.summarizer: SummarizerService = SummarizerService()
 
     def run(self, text: str) -> str:
         """

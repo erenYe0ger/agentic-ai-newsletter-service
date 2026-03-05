@@ -12,6 +12,7 @@ from email.utils import parsedate_to_datetime
 from datetime import datetime, timezone, timedelta
 
 import json
+from typing import Any
 
 
 class Orchestrator:
@@ -25,51 +26,51 @@ class Orchestrator:
     database operations separated in the repository layer.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
 
         # Database session
         self.db = SessionLocal()
 
         # Repository layer handles database operations
-        self.repo = ArticleRepository(self.db)
+        self.repo: ArticleRepository = ArticleRepository(self.db)
 
         # Pipeline components
-        self.rss_service = RSSService()
-        self.extractor = ExtractorService()
-        self.summarizer_agent = SummarizationAgent()
-        self.ranking_agent = RankingAgent()
-        self.email_agent = EmailAgent()
+        self.rss_service: RSSService = RSSService()
+        self.extractor: ExtractorService = ExtractorService()
+        self.summarizer_agent: SummarizationAgent = SummarizationAgent()
+        self.ranking_agent: RankingAgent = RankingAgent()
+        self.email_agent: EmailAgent = EmailAgent()
 
 
-    def run(self):
+    def run(self) -> None:
 
         print("[Pipeline] Loading RSS feeds...")
 
         # Load RSS sources from config
         with open("app/config/rss_sources.json") as f:
-            feeds = json.load(f)["feeds"]
+            feeds: list[str] = json.load(f)["feeds"]
 
         # Current UTC time for filtering
-        now = datetime.now(timezone.utc)
+        now: datetime = datetime.now(timezone.utc)
 
         # Determine today's database table
-        table_name = self.repo.get_today_table()
+        table_name: str = self.repo.get_today_table()
 
         for url in feeds:
 
             # Fetch articles from RSS feed
-            items = self.rss_service.fetch(url)
+            items: list[dict[str, Any]] = self.rss_service.fetch(url)
 
             for item in items:
 
-                published_raw = item.get("published")
+                published_raw: str | None = item.get("published")
 
                 # Skip entries without publish date
                 if not published_raw:
                     continue
 
                 try:
-                    published = parsedate_to_datetime(published_raw)
+                    published: datetime = parsedate_to_datetime(published_raw)
                 except Exception:
                     continue
 
@@ -80,12 +81,12 @@ class Orchestrator:
                 print(f"[Pipeline] Processing: {item['title']}")
 
                 # Extract full article content
-                raw_text = self.extractor.extract(item["link"])
+                raw_text: str = self.extractor.extract(item["link"])
 
-                description = item.get("description", "")
+                description: str = item.get("description", "")
 
                 # Combine signals for summarization
-                combined_text = f"""
+                combined_text: str = f"""
 TITLE:
 {item['title']}
 
@@ -97,16 +98,16 @@ CONTENT:
 """
 
                 # Generate article summary
-                summary = self.summarizer_agent.run(combined_text)
+                summary: str = self.summarizer_agent.run(combined_text)
 
-                article = {
+                article: dict[str, str] = {
                     "title": item["title"],
                     "link": item["link"],
                     "summary": summary,
                 }
 
                 # Compute semantic relevance score
-                score = self.ranking_agent.score(article)
+                score: float = self.ranking_agent.score(article)
 
                 # Store article in database
                 self.repo.upsert_article(
@@ -119,15 +120,15 @@ CONTENT:
         print("[Pipeline] Fetching top ranked articles...")
 
         # Retrieve best articles for newsletter
-        top_articles = self.repo.fetch_top_articles(table_name)
+        top_articles: list[dict[str, str]] = self.repo.fetch_top_articles(table_name)
 
-        deepmind_article = None
-        hf_article = None
-        others = []
+        deepmind_article: dict[str, str] | None = None
+        hf_article: dict[str, str] | None = None
+        others: list[dict[str, str]] = []
 
         for article in top_articles:
 
-            link = article["link"]
+            link: str = article["link"]
 
             if not deepmind_article and "deepmind.google" in link:
                 deepmind_article = article
@@ -139,7 +140,7 @@ CONTENT:
                 others.append(article)
 
 
-        final_articles = []
+        final_articles: list[dict[str, str]] = []
 
         # 1️⃣ Always DeepMind first if available
         if deepmind_article:

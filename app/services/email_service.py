@@ -14,7 +14,7 @@ class EmailService:
 
     def send_email(self, to_email: str, subject: str, html_content: str) -> None:
 
-        msg = MIMEText(html_content, "html")
+        msg: MIMEText = MIMEText(html_content, "html")
         msg["Subject"] = subject
         msg["From"] = os.getenv("EMAIL_ADDRESS")
         msg["To"] = to_email
