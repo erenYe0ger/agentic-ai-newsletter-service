@@ -14,7 +14,7 @@ logging.set_verbosity_error()
 
 
 def log(msg: str) -> None:
-    print(f"\n[ 🟦 {msg} ]\n")
+    print(f"\n[ 🟦 {msg} ]\n", flush=True)
 
 
 def run(cmd: str) -> None:

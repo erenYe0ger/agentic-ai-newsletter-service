@@ -4,7 +4,8 @@ from dotenv import load_dotenv
 import os
 
 # Load environment variables from .env file
-load_dotenv()
+if os.getenv("RENDER") is None:
+    load_dotenv()
 
 # Database connection string
 DATABASE_URL: str = os.getenv("DATABASE_URL")  # type: ignore
