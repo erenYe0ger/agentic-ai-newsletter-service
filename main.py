@@ -1,8 +1,10 @@
-import subprocess
-import sys
 import warnings
 import os
 from transformers.utils import logging
+
+from app.db.init_db import init_db
+from app.agents.orchestrator import Orchestrator
+
 
 # Silence unnecessary warnings
 warnings.filterwarnings("ignore")
@@ -17,29 +19,14 @@ def log(msg: str) -> None:
     print(f"\n[ 🟦 {msg} ]\n", flush=True)
 
 
-def run(cmd: str) -> None:
-    try:
-        subprocess.run(
-            cmd,
-            shell=True,
-            check=True,
-            text=True,
-        )
-    except subprocess.CalledProcessError as e:
-        print(f"[ERROR] Command failed: {cmd}")
-        print(e)
-        sys.exit(1)
-
-
 def main() -> None:
 
-    log("STEP 1 — Initializing Database Tables")
-    run("python app/db/init_db.py")
+    # Ensure required tables exist
+    log("Initializing Database Tables")
+    init_db()
 
-    log("STEP 2 — Running Newsletter Pipeline")
-
-    from app.agents.orchestrator import Orchestrator
-
+    # Run newsletter pipeline
+    log("Running Newsletter Pipeline")
     Orchestrator().run()
 
     log("🎉 DONE — Newsletter Pipeline Completed Successfully!")

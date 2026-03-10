@@ -9,22 +9,20 @@ from pydantic import BaseModel
 from sqlalchemy import text
 
 from app.db.session import engine
+from app.db.init_db import init_db
 from app.agents.orchestrator import Orchestrator
 
 
-from app.db.init_db import init_db
-
-
-# FastAPI server
+# FastAPI application
 app = FastAPI()
 
 
-# Request body model for /subscribe
+# Request body for subscribe endpoint
 class SubscribeRequest(BaseModel):
     email: str
 
 
-# Add a new subscriber
+# Add a subscriber to the database
 @app.post("/subscribe")
 def subscribe(data: SubscribeRequest):
 
@@ -42,13 +40,13 @@ def subscribe(data: SubscribeRequest):
 @app.post("/run-pipeline")
 def run_pipeline():
 
-    init_db()  # ensure today's table exists
-
+    init_db()  # ensure tables exist
     Orchestrator().run()
+
     return {"status": "pipeline executed"}
 
 
-# Daily scheduler (02:30 UTC = 08:00 IST)
+# Background scheduler (runs every day at 02:30 UTC = 08:00 IST)
 def scheduler_loop():
 
     schedule.every().day.at("02:30").do(lambda: [init_db(), Orchestrator().run()])
@@ -60,10 +58,13 @@ def scheduler_loop():
 
 if __name__ == "__main__":
 
-    # run scheduler in background
+    # Ensure tables exist on server start
+    init_db()
+
+    # Run scheduler in background
     threading.Thread(target=scheduler_loop, daemon=True).start()
 
-    # start FastAPI server
+    # Start FastAPI server
     uvicorn.run(
         "server:app",
         host="0.0.0.0",
