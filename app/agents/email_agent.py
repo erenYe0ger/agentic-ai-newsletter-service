@@ -1,7 +1,7 @@
 from app.services.email_service import EmailService
 from app.utils.email_template import build_newsletter_html
-import json
-from typing import Any
+from app.db.session import engine
+from sqlalchemy import text
 
 
 class EmailAgent:
@@ -11,25 +11,26 @@ class EmailAgent:
     """
 
     def __init__(self) -> None:
+        # Email delivery service
         self.mailer: EmailService = EmailService()
-
-        # Load recipients from config
-        with open("app/config/recipients.json", "r") as f:
-            data: dict[str, Any] = json.load(f)
-
-        self.recipients: list[str] = data["recipients"]
 
     def send(self, articles: list[dict[str, str]]) -> None:
         """
-        Generate HTML newsletter and send it to all recipients.
+        Generate HTML newsletter and send it to all subscribers.
         """
 
         print("[EmailAgent] Sending Email...")
 
-        # Build newsletter HTML from template utility
+        # Build newsletter HTML
         html: str = build_newsletter_html(articles)
 
-        for email in self.recipients:
+        # Fetch subscriber emails from database
+        with engine.connect() as conn:
+            result = conn.execute(text("SELECT email FROM subscribers"))
+            emails: list[str] = [row[0] for row in result]
+
+        # Send email to each subscriber
+        for email in emails:
             print(f"[EmailAgent] Sending to: {email}")
 
             self.mailer.send_email(
