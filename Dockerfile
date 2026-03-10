@@ -15,7 +15,7 @@ RUN pip install uv
 RUN pip install torch --index-url https://download.pytorch.org/whl/cpu
 
 # copy dependency file
-COPY pyproject.toml uv.lock ./
+COPY pyproject.toml ./
 
 # install project dependencies
 RUN uv pip install --system .
