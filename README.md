@@ -57,38 +57,39 @@ git clone https://github.com/erenYe0ger/agentic-ai-newsletter-service.git
 cd agentic-ai-newsletter-service
 ```
 
-### 2️⃣ Prerequisites & Configuration
-* **Docker Desktop:** Ensure **Docker Desktop** is installed and running on your machine to host the PostgreSQL database.
+### 2️⃣ Prerequisites
+* **Docker Desktop:** Ensure **Docker Desktop** is installed and running on your machine to host the PostgreSQL database. You can [Download Here](https://www.docker.com/products/docker-desktop/).
 * **Email App Password:** For using Gmail, you must generate an **App Password** (not your regular password). You can do this at [Google App Passwords](https://myaccount.google.com/apppasswords).
 
 ### 3️⃣ Setup config files
-Inside ```config/``` directory, add a ```recipients.json``` file to manage your mailing list:
+Inside ```app/config/``` directory, add a ```recipients.json``` file to manage your mailing list:
 ```json
 {
   "recipients": [
     "example@gmail.com",
     "example2@gmail.com",
-    "example3@gmail.com",
+    "example3@gmail.com"
   ]
 }
 ```
 
-### 4️⃣ Create a .env file
+### 4️⃣ Create a ```.env``` file at project root
 ```text
-DATABASE_URL=postgresql://user:password@localhost:5432/tech_news
+DATABASE_URL=postgresql+psycopg2://tech_user:tech_pass@postgres:5432/tech_news
 HF_API_TOKEN=your_huggingface_token
 HF_TOKEN=your_huggingface_token
-EMAIL_ADDRESS=your_email
-EMAIL_APP_PASSWORD=your_email_app_password
+EMAIL_ADDRESS=your_gmail
+EMAIL_APP_PASSWORD=your_gmail_app_password
 ```
 
 ### 5️⃣ Run the pipeline
+Run terminal at project root and paste this line:
 ```bash
-uv run main.py
+docker compose -f docker/docker-compose.yml up --build -d && docker logs -f agentic_newsletter_app && docker compose -f docker/docker-compose.yml down
 ```
 
 The pipeline will automatically:
-- ✅ Start PostgreSQL via Docker
+- ✅ Start Containerized App & PostgreSQL DB via Docker
 - ✅ Initialize database tables
 - ✅ Fetch articles from RSS feeds
 - ✅ Extract article content

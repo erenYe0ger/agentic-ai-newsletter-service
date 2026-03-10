@@ -1,0 +1,50 @@
+# ---- Git ----
+.git
+.gitignore
+
+# ---- Python ----
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+*.tmp
+*.log
+
+# ---- Virtual Environment ----
+.venv/
+env/
+venv/
+
+# ---- Environment Files ----
+.env
+.env.local
+.env.*.local
+
+# keep example env
+!example.env
+
+# ---- UV / Build Artifacts ----
+uv.lock
+dist/
+build/
+*.egg-info/
+
+# ---- IDE ----
+.vscode/
+.idea/
+
+# ---- OS ----
+.DS_Store
+Thumbs.db
+
+# ---- Cache ----
+.cache/
+.pytest_cache/
+
+# ---- Docker runtime data ----
+docker-data/
+postgres_data/
+
+# ---- Misc ----
+tree.py

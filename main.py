@@ -1,6 +1,5 @@
 import subprocess
 import sys
-import time
 import warnings
 import os
 from transformers.utils import logging
@@ -34,15 +33,10 @@ def run(cmd: str) -> None:
 
 def main() -> None:
 
-    log("STEP 1 — Starting Docker Postgres")
-    run("docker compose -f docker/docker-compose.yml up -d")
+    log("STEP 1 — Initializing Database Tables")
+    run("python app/db/init_db.py")
 
-    time.sleep(2)
-
-    log("STEP 2 — Initializing Database Tables")
-    run("uv run app/db/init_db.py")
-
-    log("STEP 3 — Running Newsletter Pipeline")
+    log("STEP 2 — Running Newsletter Pipeline")
 
     from app.agents.orchestrator import Orchestrator
 
