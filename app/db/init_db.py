@@ -1,5 +1,5 @@
 from sqlalchemy import Table, Column, Integer, String, Text, DateTime, Float, MetaData
-from session import engine
+from app.db.session import engine
 import datetime
 
 
