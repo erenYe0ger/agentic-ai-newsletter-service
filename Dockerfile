@@ -23,4 +23,4 @@ RUN uv pip install --system .
 # copy project
 COPY . .
 
-CMD ["python", "server.py"]
+CMD ["python", "-u", "server.py"]
