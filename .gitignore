@@ -46,3 +46,6 @@ app/config/recipients.json
 
 # --- xtras ---
 tree.py
+credentials.json
+token.pickle
+converter.py

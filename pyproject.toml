@@ -19,5 +19,9 @@ dependencies = [
     "numpy",
     "fastapi>=0.115.0",
     "uvicorn>=0.30.0",
-    "schedule"
+    "schedule",
+    "resend",
+    "google-api-python-client",
+    "google-auth-httplib2",
+    "google-auth-oauthlib"
 ]

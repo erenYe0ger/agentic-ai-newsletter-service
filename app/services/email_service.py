@@ -1,48 +1,46 @@
-import smtplib
-from email.mime.text import MIMEText
-from dotenv import load_dotenv
 import os
-import time
-
-load_dotenv()
+import base64
+import pickle
+from email.mime.text import MIMEText
+from googleapiclient.discovery import build
 
 
 class EmailService:
     """
-    Handles sending emails via Gmail SMTP.
+    Sends emails using Gmail API.
+    Works on cloud platforms (no SMTP).
     """
 
-    def send_email(self, to_email: str, subject: str, html_content: str) -> None:
+    def __init__(self):
 
-        msg: MIMEText = MIMEText(html_content, "html")
-        msg["Subject"] = subject
-        msg["From"] = os.getenv("EMAIL_ADDRESS")
-        msg["To"] = to_email
+        # Decode Gmail token from environment variable
+        token_bytes = base64.b64decode(os.getenv("GMAIL_TOKEN"))
 
-        retries = 3
+        # Load credentials
+        creds = pickle.loads(token_bytes)
 
-        for attempt in range(retries):
+        # Gmail API service
+        self.service = build("gmail", "v1", credentials=creds)
 
-            try:
-                # Connect to Gmail SMTP with timeout
-                with smtplib.SMTP("smtp.gmail.com", 587, timeout=30) as smtp:
-                    smtp.starttls()
+        self.sender = os.getenv("EMAIL_ADDRESS")
 
-                    smtp.login(
-                        os.getenv("EMAIL_ADDRESS"),
-                        os.getenv("EMAIL_APP_PASSWORD")
-                    )
+    def send_email(self, to_email: str, subject: str, html_content: str):
 
-                    smtp.send_message(msg)
+        # Build email message
+        message = MIMEText(html_content, "html")
+        message["to"] = to_email
+        message["from"] = self.sender
+        message["subject"] = subject
 
-                print(f"[EmailService] Email sent to {to_email}")
-                return
+        # Encode for Gmail API
+        raw_message = base64.urlsafe_b64encode(
+            message.as_bytes()
+        ).decode()
 
-            except Exception as e:
+        # Send email
+        self.service.users().messages().send(
+            userId="me",
+            body={"raw": raw_message}
+        ).execute()
 
-                print(f"[EmailService] Attempt {attempt+1} failed: {e}")
-
-                if attempt < retries - 1:
-                    time.sleep(5)
-                else:
-                    print("[EmailService] Email delivery failed.")
+        print(f"[EmailService] Sent to {to_email}")
