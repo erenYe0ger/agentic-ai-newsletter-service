@@ -41,11 +41,5 @@ Thumbs.db
 # ---- Docker ----
 docker-data/
 
-# --- config files ----
-app/config/recipients.json
-
 # --- xtras ---
 tree.py
-credentials.json
-token.pickle
-converter.py
