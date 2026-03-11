@@ -1,6 +1,6 @@
 from typing import Any
 
-def build_newsletter_html(articles: list[dict[str, str]]) -> str:
+def build_newsletter_html(articles: list[dict[str, str]], email: str) -> str:
     """
     Generates the HTML template for the newsletter.
     Presentation logic lives here, keeping EmailAgent clean.
@@ -78,7 +78,11 @@ Keeping you updated with the latest in tech, every day.
 
 <div style="color:#a2bad6;font-size:12px;margin-top:30px;text-align:center;">
 <span>© 2026 Newsletter Agent. All rights reserved.</span><br>
-<span>Made with ❤️ by Goutam</span>
+<span>Made with ❤️ by Goutam</span><br>
+<a href="https://agentic-ai-newsletter-service.onrender.com/unsubscribe?email={email}"
+style="color:#ff6b6b;text-decoration:none;border-bottom:1px solid #ff6b6b;padding-bottom:1px;">
+Unsubscribe
+</a>
 </div>
 
 </td>

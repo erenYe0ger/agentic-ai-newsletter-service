@@ -1,5 +1,5 @@
 from app.services.email_service import EmailService
-from app.utils.email_template import build_newsletter_html
+from app.utils.newsletter_template import build_newsletter_html
 from app.db.session import engine
 from sqlalchemy import text
 
@@ -21,9 +21,6 @@ class EmailAgent:
 
         print("[EmailAgent] Sending Email...")
 
-        # Build newsletter HTML
-        html: str = build_newsletter_html(articles)
-
         # Fetch subscriber emails from database
         with engine.connect() as conn:
             result = conn.execute(text("SELECT email FROM subscribers"))
@@ -32,6 +29,8 @@ class EmailAgent:
         # Send email to each subscriber
         for email in emails:
             print(f"[EmailAgent] Sending to: {email}")
+
+            html: str = build_newsletter_html(articles, email)
 
             self.mailer.send_email(
                 to_email=email,

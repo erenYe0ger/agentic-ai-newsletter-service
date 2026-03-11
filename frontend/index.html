@@ -139,6 +139,16 @@
 
                 if (res.ok) {
                     showToast("Subscribed successfully!", "success");
+
+                    setTimeout(() => {
+                        showToast("Please check your inbox", "success");
+                    }, 1000);
+
+                    setTimeout(() => {
+                        showToast("Starting the pipeline...", "success");
+                    }, 2000);
+
+
                     emailInput.value = "";
                 } else {
                     showToast("Subscription failed.", "error");
