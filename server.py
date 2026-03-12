@@ -100,6 +100,8 @@ We're sorry to see you go.
 
 
 # Add a subscriber to the database
+import threading
+
 @app.post("/subscribe")
 def subscribe(data: SubscribeRequest):
 
@@ -114,13 +116,18 @@ def subscribe(data: SubscribeRequest):
         )
         conn.commit()
 
+    # Send welcome email
     send_subscribe_email(data.email)
-    
-    # send today's digest immediately
-    init_db()
-    Orchestrator().run()
+
+    # Run pipeline in background (DO NOT BLOCK REQUEST)
+    def run_pipeline():
+        init_db()
+        Orchestrator().run()
+
+    threading.Thread(target=run_pipeline, daemon=True).start()
 
     return {"status": "subscribed"}
+
 
 
 from fastapi import Query

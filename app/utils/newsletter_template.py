@@ -6,7 +6,7 @@ def build_newsletter_html(articles: list[dict[str, str]], email: str) -> str:
     Presentation logic lives here, keeping EmailAgent clean.
     """
 
-    html: str = """
+    html: str = f"""
 <html>
 <head>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
@@ -61,7 +61,7 @@ Read the Full Report →
 <div style="height: 1px; background: #F1F5F9; margin-bottom: 40px;"></div>
 """
 
-    html += """
+    html += f"""
 <div style="text-align: center; padding: 30px; background-color: #F8FAFC; border-radius: 16px; margin-top: 20px;">
 <p style="font-size: 13px; color: #64748B; margin: 0;">
 Generated for you by <strong>

@@ -122,8 +122,6 @@
             btn.classList.add("loading");
             btn.disabled = true;
 
-            const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), 5000);
 
             try {
 
@@ -132,12 +130,12 @@
                     {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ email }),
-                        signal: controller.signal
+                        body: JSON.stringify({ email })
                     }
                 );
 
                 if (res.ok) {
+
                     showToast("Subscribed successfully!", "success");
 
                     setTimeout(() => {
@@ -148,19 +146,18 @@
                         showToast("Starting the pipeline...", "success");
                     }, 2000);
 
-
                     emailInput.value = "";
+
                 } else {
-                    showToast("Subscription failed.", "error");
+                    showToast("Subscription failed!", "error");
                 }
 
             } catch (e) {
 
-                showToast("Server unavailable.", "error");
+                showToast("Server unavailable!", "error");
 
             } finally {
 
-                clearTimeout(timeout);
                 btn.classList.remove("loading");
                 btn.disabled = false;
 
