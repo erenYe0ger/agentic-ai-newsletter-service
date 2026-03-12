@@ -14,6 +14,7 @@ from app.agents.orchestrator import Orchestrator
 
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.utils.article_selector import select_final_articles
 
 # FastAPI application
 app = FastAPI()
@@ -97,8 +98,6 @@ If you change your mind, you can always subscribe again to stay updated with the
 
 
 # Add a subscriber to the database
-import threading
-
 @app.post("/subscribe")
 def subscribe(data: SubscribeRequest):
 
@@ -115,26 +114,44 @@ def subscribe(data: SubscribeRequest):
         inserted = result.fetchone()
         conn.commit()
 
-    # email already existed
     if inserted is None:
         return {"status": "already_subscribed"}
 
-    # send welcome email
+    # welcome mail
     send_subscribe_email(data.email)
 
-    # run pipeline in background
-    def run_pipeline():
-        init_db()
-        Orchestrator().run()
+    # fetch latest digest from DB
+    orchestrator = Orchestrator()
 
-    import threading
-    threading.Thread(target=run_pipeline, daemon=True).start()
+    # try today's table
+    table_name = orchestrator.repo.get_today_table()
+    articles = orchestrator.repo.fetch_top_articles(table_name)
+
+    # fallback to yesterday
+    if not articles:
+        try:
+            yesterday_table = orchestrator.repo.get_yesterday_table()
+            articles = orchestrator.repo.fetch_top_articles(yesterday_table)
+        except:
+            articles = []
+
+    # if still empty → run pipeline
+    if not articles:
+        print("[Subscribe] No articles found. Running pipeline once...")
+        init_db()
+        orchestrator.run()
+        table_name = orchestrator.repo.get_today_table()
+        articles = orchestrator.repo.fetch_top_articles(table_name)
+
+    final_articles = select_final_articles(articles)
+    orchestrator.email_agent.send_to_user(final_articles, data.email)
+    orchestrator.db.close()
 
     return {"status": "subscribed"}
 
 
 
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse
 
 @app.get("/unsubscribe")
 def unsubscribe(email: str):

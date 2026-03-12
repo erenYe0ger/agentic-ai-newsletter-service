@@ -14,6 +14,8 @@ from datetime import datetime, timezone, timedelta
 import json
 from typing import Any
 
+from app.utils.article_selector import select_final_articles
+
 
 class Orchestrator:
     """
@@ -122,40 +124,7 @@ CONTENT:
         # Retrieve best articles for newsletter
         top_articles: list[dict[str, str]] = self.repo.fetch_top_articles(table_name)
 
-        deepmind_article: dict[str, str] | None = None
-        hf_article: dict[str, str] | None = None
-        others: list[dict[str, str]] = []
-
-        for article in top_articles:
-
-            link: str = article["link"]
-
-            if not deepmind_article and "deepmind.google" in link:
-                deepmind_article = article
-
-            elif not hf_article and "huggingface.co" in link:
-                hf_article = article
-
-            else:
-                others.append(article)
-
-
-        final_articles: list[dict[str, str]] = []
-
-        # 1️⃣ Always DeepMind first if available
-        if deepmind_article:
-            final_articles.append(deepmind_article)
-
-        # 2️⃣ Always HuggingFace second if available
-        if hf_article:
-            final_articles.append(hf_article)
-
-        # 3️⃣ Fill remaining slots with top ranked articles
-        for article in others:
-            if len(final_articles) >= 5:
-                break
-            final_articles.append(article)
-
+        final_articles = select_final_articles(top_articles)
 
         self.email_agent.send(final_articles)
 

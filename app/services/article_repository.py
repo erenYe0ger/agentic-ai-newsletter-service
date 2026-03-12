@@ -24,6 +24,12 @@ class ArticleRepository:
         """
         today: str = datetime.datetime.now(datetime.UTC).strftime("%d_%m_%Y")
         return f"articles_{today}"
+    
+
+    def get_yesterday_table(self):
+        yesterday = datetime.utcnow() - datetime.timedelta(days=1)
+        return f"articles_{yesterday.day:02d}_{yesterday.month:02d}_{yesterday.year}"    
+
 
     def upsert_article(
         self,

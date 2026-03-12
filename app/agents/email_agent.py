@@ -39,3 +39,16 @@ class EmailAgent:
             )
 
         print("[EmailAgent] All emails delivered.")
+
+
+    def send_to_user(self, articles: list[dict[str, str]], email: str) -> None:
+
+        print(f"[EmailAgent] Sending digest to new subscriber: {email}")
+
+        html: str = build_newsletter_html(articles, email)
+
+        self.mailer.send_email(
+            to_email=email,
+            subject="Your Daily Tech Digest",
+            html_content=html
+        )
