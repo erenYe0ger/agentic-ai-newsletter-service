@@ -134,7 +134,7 @@ def subscribe(data: SubscribeRequest):
 
 
 
-from fastapi.responses import RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 
 @app.get("/unsubscribe")
 def unsubscribe(email: str):
@@ -147,15 +147,57 @@ def unsubscribe(email: str):
         deleted = result.fetchone()
         conn.commit()
 
-    # if email was not in database → ignore
-    if deleted is None:
-        return RedirectResponse("https://your-frontend.netlify.app")
-
     # send goodbye email
-    send_unsubscribe_email(email)
+    if deleted:
+        send_unsubscribe_email(email)
 
-    # redirect back to frontend
-    return RedirectResponse("https://your-frontend.netlify.app")
+    return HTMLResponse("""
+<!DOCTYPE html>
+<html>
+<head>
+<title>Unsubscribed</title>
+<style>
+body {
+background: #0a0a0c;
+color: white;
+font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+display: flex;
+justify-content: center;
+align-items: center;
+height: 100vh;
+margin: 0;
+}
+
+.box {
+text-align: center;
+padding: 40px 60px;
+border-radius: 16px;
+background: rgba(255,255,255,0.05);
+backdrop-filter: blur(20px);
+border: 1px solid rgba(255,255,255,0.1);
+}
+
+h1 {
+margin: 0 0 10px 0;
+font-size: 28px;
+}
+
+p {
+margin: 0;
+color: #9ca3af;
+font-size: 14px;
+}
+</style>
+<link rel="icon" type="image/svg+xml" href="https://www.docker.com/wp-content/uploads/2022/03/Moby-logo.png">
+</head>
+<body>
+<div class="box">
+<h1>You have been unsubscribed</h1>
+<p>You may close this tab.</p>
+</div>
+</body>
+</html>
+""")
 
 
 

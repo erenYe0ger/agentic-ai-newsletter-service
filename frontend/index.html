@@ -15,26 +15,28 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>
 </head>
-<body class="bg-[#0a0a0c] text-white h-screen overflow-hidden flex items-center justify-center">
+<body class="bg-[#020617] text-white selection:bg-emerald-500/30">
 
     <div id="canvas-bg"></div>
 
-    <div class="container relative z-10 flex flex-col items-center justify-center px-6 text-center h-full max-h-[850px]">
+    <div class="container relative z-10 flex flex-col items-center justify-center px-6 py-12 mx-auto min-h-screen text-center">
         
-        <header class="mb-6 md:mb-10 w-full max-w-4xl">
-            <h1 id="hero-title" class="text-4xl md:text-5xl font-bold tracking-tight mb-4 text-white">
+        <header class="mb-8 md:mb-12 w-full max-w-4xl">
+            <h1 id="hero-title" class="text-4xl md:text-5xl font-bold tracking-tight mb-4 text-white drop-shadow-sm">
                 Agentic AI Newsletter Service
             </h1>
             
-            <div class="h-16 md:h-20 flex items-center justify-center">
-                <span id="typed-text" class="text-lg md:text-2xl text-slate-400 leading-relaxed font-medium"></span>
+            <div class="h-20 md:h-24 flex items-center justify-center overflow-hidden">
+                <div class="max-w-[90vw]">
+                    <span id="typed-text" class="text-lg md:text-2xl text-slate-300 leading-relaxed font-medium"></span>
+                </div>
             </div>
         </header>
 
-        <div id="main-card" class="glass rounded-[2rem] p-8 md:p-12 shadow-2xl w-full max-w-xl">
+        <div id="main-card" class="glass rounded-[2rem] p-8 md:p-12 shadow-2xl w-full max-w-xl border border-white/10">
             <div class="mb-8">
-                <h3 class="text-xl font-semibold mb-2">Subscribe to the Daily Feed</h3>
-                <p class="text-slate-500 text-sm">Technical breakthroughs, summarized and ranked.</p>
+                <h3 class="text-xl md:text-2xl font-semibold mb-2 text-white">Subscribe to the Daily Feed</h3>
+                <p class="text-slate-400 text-sm md:text-base">Technical breakthroughs, summarized and ranked.</p>
             </div>
 
             <div class="space-y-4">
@@ -43,54 +45,54 @@
                     class="input-field"
                     onkeydown="if(event.key === 'Enter') subscribe()">
                 
-                <button id="sub-btn" onclick="subscribe()" class="submit-btn">
-                    <span class="btn-text">Subscribe for free</span>
-                    <div class="spinner"></div>
+                <button id="sub-btn" onclick="subscribe()" class="submit-btn group overflow-hidden relative">
+                    <span class="btn-text relative z-10">Subscribe for free</span>
+                    <div class="dot-loader">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
                 </button>
             </div>
         </div>
-        <div class="mt-10 flex flex-col items-center animate-fade-in">
+
+        <div class="mt-12 flex flex-col items-center animate-fade-in">
             <div class="glass-pill px-6 py-3 flex items-center gap-3">
                 <span class="text-slate-400 text-sm font-medium">Want to see how the agents work?</span>
-                <div class="h-4 w-[1px] bg-white/10 mx-1"></div>
+                <div class="h-4 w-[1px] bg-white/20 mx-1"></div>
                 <a 
                     href="https://github.com/erenYe0ger/agentic-ai-newsletter-service"
                     target="_blank"
-                    class="flex items-center gap-2 text-white hover:text-indigo-400 transition-all duration-300 group"
+                    class="flex items-center gap-2 text-white hover:text-emerald-400 transition-all duration-300 group"
                 >
                     <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
                         <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
                     </svg>
                     <span class="text-sm font-semibold tracking-wide">Explore Source</span>
-                    <svg class="w-3 h-3 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
                 </a>
             </div>
         </div>
     </div>
 
     <div id="toast" class="toast-container">
-        <span id="toast-icon" class="font-bold text-lg"></span>
-        <span id="toast-msg" class="text-sm font-semibold tracking-wide"></span>
+        <span id="toast-icon"></span>
+        <span id="toast-msg"></span>
     </div>
 
     <script>
-        // Grayish Slate Fog Background
         VANTA.FOG({
             el: "#canvas-bg",
             mouseControls: true,
             touchControls: true,
-            highlightColor: 0x4b5563, 
-            midtoneColor: 0x1f2937,   
-            lowlightColor: 0x111827,
-            baseColor: 0x0a0a0c,      
-            blurFactor: 0.7,
-            speed: 1.8,
-            zoom: 1.2
+            highlightColor: 0x1d4ed8, 
+            midtoneColor: 0x1e1b4b,   
+            lowlightColor: 0x020617,
+            baseColor: 0x020617,      
+            blurFactor: 0.6,
+            speed: 3.5,
+            zoom: 1.1
         });
 
-        // Typewriter logic
         new Typed('#typed-text', {
             strings: [
                 'Agents scan the internet for AI breakthroughs.',
@@ -104,27 +106,28 @@
             cursorChar: '_'
         });
 
-        // Entrance Animations
         gsap.from("#hero-title", { opacity: 0, scale: 0.98, y: 15, duration: 1.2, ease: "power3.out" });
         gsap.from("#main-card", { opacity: 0, y: 25, duration: 1.2, delay: 0.5, ease: "expo.out" });
+
+        function isValidEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
 
         async function subscribe() {
             const emailInput = document.getElementById("email");
             const btn = document.getElementById("sub-btn");
             const email = emailInput.value.trim();
 
-            if (!email) {
-                showToast("Something went wrong. Try again later.", "error");
+            if (!email || !isValidEmail(email)) {
+                await showToast("Please enter a valid email address", "error");
                 return;
             }
 
-            // Disable button and show loading state
             btn.classList.add("loading");
             btn.disabled = true;
 
-
             try {
-
                 const res = await fetch(
                     "https://agentic-ai-newsletter-service.onrender.com/subscribe",
                     {
@@ -134,74 +137,49 @@
                     }
                 );
 
-
                 const data = await res.json();
 
                 if (data.status === "already_subscribed") {
-
-                    showToast("You are already subscribed!", "error");
-
+                    await showToast("You are already subscribed!", "error");
                 }
                 else if (data.status === "subscribed") {
-
-                    showToast("Subscribed successfully!", "success");
-
-                    setTimeout(() => {
-                        showToast("Please check your inbox", "success");
-                    }, 1200);
-
-                    setTimeout(() => {
-                        showToast("Sending Today's Newsletter...", "success");
-                    }, 2400);
-
+                    await showToast("Subscribed successfully!", "success");
+                    await showToast("Please check your inbox", "success");
+                    await showToast("Sending Today's Newsletter...", "success");
                     emailInput.value = "";
-
                 }
                 else {
-
-                    showToast("Subscription failed!", "error");
-
+                    await showToast("Subscription failed!", "error");
                 }
 
             } catch (e) {
-
-                showToast("Server unavailable!", "error");
-
+                await showToast("Server unavailable!", "error");
             } finally {
-
                 btn.classList.remove("loading");
                 btn.disabled = false;
-
             }
         }
 
         function showToast(text, type) {
+            return new Promise(resolve => {
+                const toast = document.getElementById("toast");
+                const msg = document.getElementById("toast-msg");
+                const icon = document.getElementById("toast-icon");
 
-            const container = document.createElement("div");
+                msg.innerText = text;
+                icon.innerText = type === "success" ? "✓" : "✕";
 
-            container.className = "toast-container active";
+                icon.className = type === "success"
+                    ? "font-bold text-lg text-green-400"
+                    : "font-bold text-lg text-red-400";
 
-            const icon = document.createElement("span");
-            icon.className = "font-bold text-lg";
-            icon.innerText = type === "success" ? "✓" : "✕";
-            icon.classList.add(type === "success" ? "text-green-400" : "text-red-400");
+                toast.classList.add("active");
 
-            const msg = document.createElement("span");
-            msg.className = "text-sm font-semibold tracking-wide";
-            msg.innerText = text;
-
-            container.appendChild(icon);
-            container.appendChild(msg);
-
-            document.body.appendChild(container);
-
-            const existingToasts = document.querySelectorAll(".toast-container");
-
-            container.style.bottom = `${30 + (existingToasts.length - 1) * 60}px`;
-
-            setTimeout(() => {
-                container.remove();
-            }, 6000);
+                setTimeout(() => {
+                    toast.classList.remove("active");
+                    resolve();
+                }, 2000);
+            });
         }
     </script>
 </body>
