@@ -44,21 +44,20 @@ from app.utils.sub_layout import wrap_email
 def send_subscribe_email(email: str):
 
     content = """
-<h2 style="font-family:'Playfair Display',serif;font-size:28px;color:#1E293B;margin-bottom:20px;">
-Subscription Confirmed!
+<h2 style="font-family:'Playfair Display',serif; font-size:30px; color:#1E293B; margin: 0 0 15px 0; line-height: 1.2;">
+Welcome to the Pipeline!
 </h2>
-
-<p style="font-size:18px;color:#475569;margin:0;">
-Welcome to the Agentic AI Digest.
+<p style="font-size:18px; color:#475569; margin: 0 0 10px 0; font-weight: 400;">
+You're officially subscribed to the <strong>Agentic AI Digest</strong>.
 </p>
-
-<p style="font-size:16px;color:#64748B;margin-top:15px;">
-Our agents summarize the most important AI breakthroughs
-and deliver them straight to your inbox.
+<p style="font-size:16px; color:#64748B; margin: 10px 0 0 0; line-height: 1.6;">
+Our autonomous agents are currently scanning the horizon for the latest AI breakthroughs, research papers, and tool launches. We filter the noise so you only get the signal.
 </p>
-
-<p style="font-size:16px;color:#64748B;margin-top:20px;">
-Your first digest is on its way.
+<p style="font-size:16px; color:#6366F1; margin: 25px 0 0 0; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
+Your first digest arrives shortly.
+</p>
+<p style="font-size:16px; color:#ec0808; margin: 25px 0 0 0; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
+You'll receive a beautifully curated newsletter every day at 08:00 IST, packed with the most important AI news and insights in last 24 hours.
 </p>
 """
 
@@ -66,7 +65,7 @@ Your first digest is on its way.
 
     mailer.send_email(
         to_email=email,
-        subject="Welcome to the Agentic AI Digest",
+        subject="Welcome to the Pipeline!",
         html_content=html
     )
 
@@ -76,16 +75,14 @@ Your first digest is on its way.
 def send_unsubscribe_email(email: str):
 
     content = """
-<h2 style="font-family:'Playfair Display',serif;font-size:28px;color:#1E293B;margin-bottom:20px;">
-You have been unsubscribed
+<h2 style="font-family:'Playfair Display',serif; font-size:30px; color:#1E293B; margin: 0 0 15px 0; line-height: 1.2;">
+You have been unsubscribed!
 </h2>
-
-<p style="font-size:18px;color:#475569;margin:0;">
-You will no longer receive the Agentic AI Digest.
+<p style="font-size:16px; color:#64748B; margin: 10px 0 0 0; line-height: 1.6;">
+You will no longer receive the Daily Digest. We're sorry to see you go!
 </p>
-
-<p style="font-size:16px;color:#64748B;margin-top:20px;">
-We're sorry to see you go.
+<p style="font-size:16px; color:#6366F1; margin: 25px 0 0 0; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
+If you change your mind, you can always subscribe again to stay updated with the latest in AI and Tech.
 </p>
 """
 
@@ -106,45 +103,60 @@ import threading
 def subscribe(data: SubscribeRequest):
 
     with engine.connect() as conn:
-        conn.execute(
+        result = conn.execute(
             text("""
                 INSERT INTO subscribers (email)
                 VALUES (:email)
                 ON CONFLICT (email) DO NOTHING
+                RETURNING email
             """),
             {"email": data.email},
         )
+        inserted = result.fetchone()
         conn.commit()
 
-    # Send welcome email
+    # email already existed
+    if inserted is None:
+        return {"status": "already_subscribed"}
+
+    # send welcome email
     send_subscribe_email(data.email)
 
-    # Run pipeline in background (DO NOT BLOCK REQUEST)
+    # run pipeline in background
     def run_pipeline():
         init_db()
         Orchestrator().run()
 
+    import threading
     threading.Thread(target=run_pipeline, daemon=True).start()
 
     return {"status": "subscribed"}
 
 
 
-from fastapi import Query
+from fastapi.responses import RedirectResponse
 
 @app.get("/unsubscribe")
-def unsubscribe(email: str = Query(...)):
+def unsubscribe(email: str):
 
     with engine.connect() as conn:
-        conn.execute(
-            text("DELETE FROM subscribers WHERE email = :email"),
-            {"email": email},
+        result = conn.execute(
+            text("DELETE FROM subscribers WHERE email=:email RETURNING email"),
+            {"email": email}
         )
+        deleted = result.fetchone()
         conn.commit()
 
+    # if email was not in database → ignore
+    if deleted is None:
+        return RedirectResponse("https://your-frontend.netlify.app")
+
+    # send goodbye email
     send_unsubscribe_email(email)
 
-    return {"status": "unsubscribed"}
+    # redirect back to frontend
+    return RedirectResponse("https://your-frontend.netlify.app")
+
 
 
 @app.get("/")

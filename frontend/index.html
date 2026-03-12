@@ -134,22 +134,33 @@
                     }
                 );
 
-                if (res.ok) {
+
+                const data = await res.json();
+
+                if (data.status === "already_subscribed") {
+
+                    showToast("You are already subscribed!", "error");
+
+                }
+                else if (data.status === "subscribed") {
 
                     showToast("Subscribed successfully!", "success");
 
                     setTimeout(() => {
                         showToast("Please check your inbox", "success");
-                    }, 1000);
+                    }, 1200);
 
                     setTimeout(() => {
-                        showToast("Starting the pipeline...", "success");
-                    }, 2000);
+                        showToast("Sending Today's Newsletter...", "success");
+                    }, 2400);
 
                     emailInput.value = "";
 
-                } else {
+                }
+                else {
+
                     showToast("Subscription failed!", "error");
+
                 }
 
             } catch (e) {
@@ -165,14 +176,32 @@
         }
 
         function showToast(text, type) {
-            const toast = document.getElementById("toast");
-            const msg = document.getElementById("toast-msg");
-            const icon = document.getElementById("toast-icon");
-            msg.innerText = text;
+
+            const container = document.createElement("div");
+
+            container.className = "toast-container active";
+
+            const icon = document.createElement("span");
+            icon.className = "font-bold text-lg";
             icon.innerText = type === "success" ? "✓" : "✕";
-            icon.className = type === "success" ? "text-green-400" : "text-red-400";
-            toast.classList.add("active");
-            setTimeout(() => toast.classList.remove("active"), 10000);
+            icon.classList.add(type === "success" ? "text-green-400" : "text-red-400");
+
+            const msg = document.createElement("span");
+            msg.className = "text-sm font-semibold tracking-wide";
+            msg.innerText = text;
+
+            container.appendChild(icon);
+            container.appendChild(msg);
+
+            document.body.appendChild(container);
+
+            const existingToasts = document.querySelectorAll(".toast-container");
+
+            container.style.bottom = `${30 + (existingToasts.length - 1) * 60}px`;
+
+            setTimeout(() => {
+                container.remove();
+            }, 6000);
         }
     </script>
 </body>

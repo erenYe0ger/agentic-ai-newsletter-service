@@ -1,114 +1,122 @@
 # 🤖 Agentic AI Newsletter Service
 
-**Agentic AI Newsletter Service** is an automated pipeline that collects the latest tech and AI news, summarizes articles using large language models, ranks them by relevance, and delivers a curated daily newsletter via email. 📬
+An autonomous AI-powered system that discovers, summarizes, ranks, and delivers the most relevant AI and technology news directly to subscribers via email. 
 
-> The system runs fully autonomously and transforms raw web content into a concise, structured daily digest. 🚀
-
----
-
-## 🌟 Overview
-
-This project implements an **agent-driven information pipeline** that automatically curates relevant tech and AI news.
-
-The pipeline performs the following steps:
-
-1. 🛰 **Fetch** articles from RSS feeds
-2. 📄 **Extract** full article content from webpages
-3. 🧠 **Generate** concise summaries using LLMs
-4. 📊 **Rank** articles based on semantic similarity to AI topics
-5. 🗄 **Store** processed articles in PostgreSQL
-6. 📧 **Deliver** the top articles as a styled HTML newsletter
-
-The result is a fully automated **AI-powered information curation system**. 🛠️
+This project demonstrates a production-style AI pipeline combining modern backend architecture with agentic workflows.
 
 ---
 
-## 🛠 Tech Stack
+## 🚀 Features & Pipeline
 
-### ⚙️ Backend
-- **Language:** Python 🐍
+The system transforms raw web content into a concise, structured daily digest:
 
-### 🧠 AI / NLP
-- **Inference:** HuggingFace Inference API 🤗
-- **Embeddings:** SentenceTransformers
-
-### 🕸 Data Processing
-- **Parsing:** BeautifulSoup 🥣
-- **Feeds:** Feedparser
-
-### 🗄 Database
-- **Engine:** PostgreSQL 🐘
-- **ORM:** SQLAlchemy
-
-### 🏗 Infrastructure
-- **Containerization:** Docker 🐳
-- **Environment:** UV (Python environment manager) ⚡
-
-### 📧 Email Delivery
-- **Protocol:** SMTP
+* 🛰️ **RSS Ingestion**: Monitors trusted AI and tech feeds.
+* 📄 **Content Extraction**: Pulls full article text from source webpages.
+* 🧠 **LLM Summarization**: Generates concise insights using transformer models.
+* 📊 **Semantic Ranking**: Sorts articles by relevance to user interests.
+* 🗄️ **Persistent Storage**: Manages subscriber data and articles in PostgreSQL.
+* 📧 **Automated Delivery**: Sends high-quality HTML newsletters via Gmail API daily at 8:00 IST.
+* 🐳 **Cloud Native**: Fully containerized with Docker and deployed to the cloud.
 
 ---
 
-## 🚀 Running the Project
+## 🌐 Live Deployment
 
-### 1️⃣ Clone the repository
+| Component | URL |
+| :--- | :--- |
+| **Frontend (Subscription)** | [https://daily-tech-digest.netlify.app](https://daily-tech-digest.netlify.app) |
+| **Backend API** | [https://agentic-ai-newsletter-service.onrender.com](https://agentic-ai-newsletter-service.onrender.com) |
+
+> `[!IMPORTANT]`
+> This `deploy` branch contains the cloud-ready configuration. If you wish to run the pipeline locally with a local PostgreSQL container, please switch to the `main` branch.
+
+---
+
+## 🏗️ System Architecture
+
+* **Frontend**: Static landing page hosted on **Netlify**.
+* **Backend**: **FastAPI** server running inside a **Docker** container on **Render**.
+* **Database**: **PostgreSQL** managed instance on **Render**.
+* **Email**: **Gmail API** utilizing secure **OAuth2** authentication.
+
+---
+
+## ⚙️ Pipeline Flow
+
+1.  **Subscription**: User enters email on the frontend → sent to `/subscribe`.
+2.  **Persistence**: Backend stores the email in PostgreSQL.
+3.  **Onboarding**: An automated Welcome Email is dispatched.
+4.  **AI Orchestration**: The pipeline triggers:
+    * Fetch RSS → Extract → Summarize → Rank → Build Mail → Dispatch.
+
+---
+
+## 🛠️ Deployment Guide
+
+Follow these steps to reproduce the deployment environment.
+
+### 1️⃣ Clone the Repository
 ```bash
 git clone https://github.com/erenYe0ger/agentic-ai-newsletter-service.git
 cd agentic-ai-newsletter-service
+git checkout deploy
 ```
 
-### 2️⃣ Prerequisites
-* **Docker Desktop:** Ensure **Docker Desktop** is installed and running on your machine to host the PostgreSQL database. You can [Download Here](https://www.docker.com/products/docker-desktop/).
-* **Email App Password:** For using Gmail, you must generate an **App Password** (not your regular password). You can do this at [Google App Passwords](https://myaccount.google.com/apppasswords).
+### 2️⃣ Setup Gmail API (OAuth)
+The system uses the Gmail API for secure delivery.
 
-### 3️⃣ Setup config files
-Inside ```app/config/``` directory, add a ```recipients.json``` file to manage your mailing list:
-```json
-{
-  "recipients": [
-    "example@gmail.com",
-    "example2@gmail.com",
-    "example3@gmail.com"
-  ]
-}
-```
+1.  **Google Cloud Project**: Create a new project at [Google Cloud Console](https://console.cloud.google.com).
+2.  **Enable API**: Search for and enable the **Gmail API**.
+3.  **Credentials**: Create an **OAuth Client ID** (Type: Desktop Application). Download the JSON and rename it to `credentials.json` in your root folder.
+4.  **Generate Token**: Create `generate_token.py`:
+    ```python
+    import pickle
+    from google_auth_oauthlib.flow import InstalledAppFlow
+    SCOPES = ['https://www.googleapis.com/auth/gmail.send']
+    flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
+    creds = flow.run_local_server(port=0)
+    with open('token.pickle','wb') as token:
+        pickle.dump(creds, token)
+    print("Token generated successfully")
+    ```
+5.  **Encode Token**: Run the script, then encode the resulting `token.pickle`:
+    ```bash
+    python -c "import base64;print(base64.b64encode(open('token.pickle','rb').read()).decode())"
+    ```
+    *Copy the output string for the `GMAIL_TOKEN` environment variable. Delete the files just created.*
 
-### 4️⃣ Create a ```.env``` file at project root
-```text
-DATABASE_URL=postgresql+psycopg2://tech_user:tech_pass@postgres:5432/tech_news
-HF_API_TOKEN=your_huggingface_token
-HF_TOKEN=your_huggingface_token
-EMAIL_ADDRESS=your_gmail
-EMAIL_APP_PASSWORD=your_gmail_app_password
-```
+### 3️⃣ Create PostgreSQL Database (Render)
+1.  Create a new **PostgreSQL** instance on [Render](https://render.com).
+2.  Set Database: `newsletter_db`, User: `newsletter_user`.
+3.  Copy the **Internal Database URL** (e.g., `postgres://user:pass@host:port/db`).
 
-### 5️⃣ Run the pipeline
-Run terminal at project root and paste this line:
+### 4️⃣ Deploy Backend on Render
+1.  Create a **New Web Service** and connect this repository.
+2.  **Branch**: `deploy`.
+3.  **Region**: Same as your database.
+4.  **Runtime**: Docker.
+5.  **Environment Variables**:
+    * `EMAIL_ADDRESS`: Your Gmail address.
+    * `GMAIL_TOKEN`: The base64 string from Step 2.
+    * `DATABASE_URL`: The Internal URL from Step 3.
+    * `HF_API_TOKEN`: Your HuggingFace API token.
+    * `HF_TOKEN`: Your HuggingFace API token.
+
+### 5️⃣ Deploy Frontend (Netlify)
+1.  Create **New Site from Git** on Netlify.
+2.  **Base Directory**: `frontend`.
+3.  **Publish Directory**: `frontend`.
+4.  **Build Command**: *Leave blank*.
+
+---
+
+## 🛠️ Manual Controls
+To manually trigger the full curation and delivery pipeline:
 ```bash
-docker compose -f docker/docker-compose.yml up --build -d && docker logs -f agentic_newsletter_app && docker compose -f docker/docker-compose.yml down
+curl -X POST https://agentic-ai-newsletter-service.onrender.com/run-pipeline
 ```
 
-The pipeline will automatically:
-- ✅ Start Containerized App & PostgreSQL DB via Docker
-- ✅ Initialize database tables
-- ✅ Fetch articles from RSS feeds
-- ✅ Extract article content
-- ✅ Generate AI summaries
-- ✅ Rank articles by relevance
-- ✅ Send the newsletter email
-
 ---
 
-## 📤 Output
-
-Each newsletter email contains:
-- 📌 **Curated article titles**
-- 📝 **AI-generated summaries**
-- 🔗 **Links to the original articles**
-- 🔥 **The most relevant AI and tech news of the day**
-
-*All emails are delivered using a clean HTML newsletter layout.* ✨
-
----
-
-**Author:** [Goutam Mukherjee](https://github.com/erenYe0ger) ✍️
+## ✍️ Author
+**Goutam Mukherjee**
