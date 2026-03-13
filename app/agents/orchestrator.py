@@ -22,10 +22,9 @@ class Orchestrator:
     Main orchestration agent for the newsletter pipeline.
 
     Pipeline flow:
-        RSS → Extract → Summarize → Rank → Store → Email
+        RSS → Extract → Summarize → Rank → Store
 
-    This class coordinates all agents and services while keeping
-    database operations separated in the repository layer.
+    Email delivery is triggered separately.
     """
 
     def __init__(self) -> None:
@@ -44,9 +43,9 @@ class Orchestrator:
         self.email_agent: EmailAgent = EmailAgent()
 
 
-    def run(self) -> None:
+    def collect_news(self) -> None:
 
-        print("[Pipeline] Loading RSS feeds...")
+        print("[CollectNews] Loading RSS feeds...")
 
         # Load RSS sources from config
         with open("app/config/rss_sources.json") as f:
@@ -60,14 +59,12 @@ class Orchestrator:
 
         for url in feeds:
 
-            # Fetch articles from RSS feed
             items: list[dict[str, Any]] = self.rss_service.fetch(url)
 
             for item in items:
 
                 published_raw: str | None = item.get("published")
 
-                # Skip entries without publish date
                 if not published_raw:
                     continue
 
@@ -76,18 +73,15 @@ class Orchestrator:
                 except Exception:
                     continue
 
-                # Skip articles older than 24 hours
                 if now - published > timedelta(hours=24):
                     continue
 
-                print(f"[Pipeline] Processing: {item['title']}")
+                print(f"[CollectNews] Processing: {item['title']}")
 
-                # Extract full article content
                 raw_text: str = self.extractor.extract(item["link"])
 
                 description: str = item.get("description", "")
 
-                # Combine signals for summarization
                 combined_text: str = f"""
 TITLE:
 {item['title']}
@@ -99,7 +93,6 @@ CONTENT:
 {raw_text}
 """
 
-                # Generate article summary
                 summary: str = self.summarizer_agent.run(combined_text)
 
                 article: dict[str, str] = {
@@ -108,10 +101,8 @@ CONTENT:
                     "summary": summary,
                 }
 
-                # Compute semantic relevance score
                 score: float = self.ranking_agent.score(article)
 
-                # Store article in database
                 self.repo.upsert_article(
                     table_name=table_name,
                     article=article,
@@ -119,13 +110,23 @@ CONTENT:
                     published_raw=published_raw,
                 )
 
-        print("[Pipeline] Fetching top ranked articles...")
+        print("[CollectNews] Completed.")
 
-        # Retrieve best articles for newsletter
-        top_articles: list[dict[str, str]] = self.repo.fetch_top_articles(table_name)
+
+    def send_digest(self) -> None:
+
+        print("[SendDigest] Preparing newsletter...")
+
+        table_name = self.repo.get_today_table()
+
+        top_articles = self.repo.fetch_top_articles(table_name)
 
         final_articles = select_final_articles(top_articles)
 
+        if not final_articles:
+            print("[SendDigest] No articles available.")
+            return
+
         self.email_agent.send(final_articles)
 
-        print("[Pipeline] Completed.")
+        print("[SendDigest] Emails sent successfully.")

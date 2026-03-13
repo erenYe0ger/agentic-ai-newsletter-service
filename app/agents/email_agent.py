@@ -11,23 +11,18 @@ class EmailAgent:
     """
 
     def __init__(self) -> None:
-        # Email delivery service
         self.mailer: EmailService = EmailService()
 
     def send(self, articles: list[dict[str, str]]) -> None:
-        """
-        Generate HTML newsletter and send it to all subscribers.
-        """
 
         print("[EmailAgent] Sending Email...")
 
-        # Fetch subscriber emails from database
         with engine.connect() as conn:
             result = conn.execute(text("SELECT email FROM subscribers"))
             emails: list[str] = [row[0] for row in result]
 
-        # Send email to each subscriber
         for email in emails:
+
             print(f"[EmailAgent] Sending to: {email}")
 
             html: str = build_newsletter_html(articles, email)

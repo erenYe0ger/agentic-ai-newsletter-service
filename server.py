@@ -3,6 +3,7 @@ import uvicorn
 import threading
 import time
 import schedule
+from datetime import datetime, timezone
 
 from fastapi import FastAPI
 from pydantic import BaseModel, EmailStr
@@ -13,12 +14,14 @@ from app.db.init_db import init_db
 from app.agents.orchestrator import Orchestrator
 
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
 
 from app.utils.article_selector import select_final_articles
+from app.services.email_service import EmailService
+from app.utils.sub_layout import wrap_email
 
 # FastAPI application
 app = FastAPI()
-
 
 app.add_middleware(
     CORSMiddleware,
@@ -28,19 +31,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 # Request body for subscribe endpoint
 class SubscribeRequest(BaseModel):
     email: EmailStr
 
-
-from app.services.email_service import EmailService
-
 mailer = EmailService()
 
+# Maintenance window check (00:00–00:05 UTC)
+def maintenance_window_active():
+    now = datetime.now(timezone.utc)
+    return now.hour == 0 and now.minute < 5
 
-
-from app.utils.sub_layout import wrap_email
 
 def send_subscribe_email(email: str):
 
@@ -71,8 +72,6 @@ You'll receive a beautifully curated newsletter every day at 08:00 IST, packed w
     )
 
 
-
-
 def send_unsubscribe_email(email: str):
 
     content = """
@@ -96,10 +95,14 @@ If you change your mind, you can always subscribe again to stay updated with the
     )
 
 
-
-# Add a subscriber to the database
 @app.post("/subscribe")
 def subscribe(data: SubscribeRequest):
+
+    if maintenance_window_active():
+        return {
+            "status": "unavailable",
+            "message": "Server maintenance from 05:30-05:35 IST. Please try again shortly."
+        }
 
     with engine.connect() as conn:
         result = conn.execute(
@@ -117,41 +120,33 @@ def subscribe(data: SubscribeRequest):
     if inserted is None:
         return {"status": "already_subscribed"}
 
-    # welcome mail
-    send_subscribe_email(data.email)
+    def background_subscription_job(email):
 
-    # fetch latest digest from DB
-    orchestrator = Orchestrator()
-
-    # try today's table
-    table_name = orchestrator.repo.get_today_table()
-    articles = orchestrator.repo.fetch_top_articles(table_name)
-
-    # fallback to yesterday
-    if not articles:
         try:
-            yesterday_table = orchestrator.repo.get_yesterday_table()
-            articles = orchestrator.repo.fetch_top_articles(yesterday_table)
-        except:
-            articles = []
+            send_subscribe_email(email)
 
-    # if still empty → run pipeline
-    if not articles:
-        print("[Subscribe] No articles found. Running pipeline once...")
-        init_db()
-        orchestrator.run()
-        table_name = orchestrator.repo.get_today_table()
-        articles = orchestrator.repo.fetch_top_articles(table_name)
+            orchestrator = Orchestrator()
 
-    final_articles = select_final_articles(articles)
-    orchestrator.email_agent.send_to_user(final_articles, data.email)
-    orchestrator.db.close()
+            table_name = orchestrator.repo.get_today_table()
+            articles = orchestrator.repo.fetch_top_articles(table_name)
+
+            if articles:
+                final_articles = select_final_articles(articles)
+                orchestrator.email_agent.send_to_user(final_articles, email)
+
+            orchestrator.db.close()
+
+        except Exception as e:
+            print("[Subscribe Background Job Error]", e)
+
+    threading.Thread(
+        target=background_subscription_job,
+        args=(data.email,),
+        daemon=True
+    ).start()
 
     return {"status": "subscribed"}
 
-
-
-from fastapi.responses import HTMLResponse
 
 @app.get("/unsubscribe")
 def unsubscribe(email: str):
@@ -164,7 +159,6 @@ def unsubscribe(email: str):
         deleted = result.fetchone()
         conn.commit()
 
-    # send goodbye email
     if deleted:
         send_unsubscribe_email(email)
 
@@ -217,7 +211,6 @@ font-size: 14px;
 """)
 
 
-
 @app.get("/")
 def root():
     return {
@@ -227,24 +220,20 @@ def root():
     }
 
 
-# Manually trigger the newsletter pipeline
-@app.post("/run-pipeline")
-def run_pipeline():
-
-    init_db()  # ensure tables exist
-    Orchestrator().run()
-
-    return {"status": "pipeline executed"}
-
-
-# Background scheduler (runs every day at 02:30 UTC = 08:00 IST)
 def scheduler_loop():
 
-    def daily_job():
-        init_db()
-        Orchestrator().run()
+    orchestrator = Orchestrator()
 
-    schedule.every().day.at("02:30").do(daily_job)
+    def collect_news_job():
+        print("[Scheduler] Running collect_news...")
+        orchestrator.collect_news()
+
+    def send_digest_job():
+        print("[Scheduler] Running send_digest...")
+        orchestrator.send_digest()
+
+    schedule.every().day.at("00:00").do(collect_news_job)
+    schedule.every().day.at("02:30").do(send_digest_job)
 
     while True:
         schedule.run_pending()
@@ -253,13 +242,19 @@ def scheduler_loop():
 
 if __name__ == "__main__":
 
-    # Ensure tables exist on server start
     init_db()
 
-    # Run scheduler in background
+    orchestrator = Orchestrator()
+
+    table = orchestrator.repo.get_today_table()
+    articles = orchestrator.repo.fetch_top_articles(table)
+
+    if not articles:
+        print("[Startup] No articles found for today. Running pipeline once...")
+        orchestrator.collect_news()
+
     threading.Thread(target=scheduler_loop, daemon=True).start()
 
-    # Start FastAPI server
     uvicorn.run(
         "server:app",
         host="0.0.0.0",
