@@ -232,31 +232,14 @@ def scheduler_loop():
         print("[Scheduler] Running send_digest...")
         orchestrator.send_digest()
 
-    schedule.every().day.at("00:00").do(collect_news_job)
-    schedule.every().day.at("02:30").do(send_digest_job)
+    schedule.every(2).minutes.do(collect_news_job)
+    schedule.every(4).minutes.do(send_digest_job)
 
     while True:
         schedule.run_pending()
         time.sleep(60)
 
 
-if __name__ == "__main__":
+init_db()
 
-    init_db()
-
-    orchestrator = Orchestrator()
-
-    table = orchestrator.repo.get_today_table()
-    articles = orchestrator.repo.fetch_top_articles(table)
-
-    if not articles:
-        print("[Startup] No articles found for today. Running pipeline once...")
-        orchestrator.collect_news()
-
-    threading.Thread(target=scheduler_loop, daemon=True).start()
-
-    uvicorn.run(
-        "server:app",
-        host="0.0.0.0",
-        port=int(os.environ.get("PORT", 8000))
-    )
+threading.Thread(target=scheduler_loop, daemon=True).start()
