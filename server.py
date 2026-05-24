@@ -232,8 +232,8 @@ def scheduler_loop():
         print("[Scheduler] Running send_digest...")
         orchestrator.send_digest()
 
-    schedule.every(2).minutes.do(collect_news_job)
-    schedule.every(4).minutes.do(send_digest_job)
+    schedule.every(5).minutes.do(collect_news_job)
+    schedule.every(6).minutes.do(send_digest_job)
 
     while True:
         schedule.run_pending()
