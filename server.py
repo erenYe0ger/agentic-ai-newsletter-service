@@ -240,9 +240,16 @@ def scheduler_loop():
         time.sleep(60)
 
 
-init_db()
+@app.on_event("startup")
+def startup_event():
 
-threading.Thread(target=scheduler_loop, daemon=True).start()
+    init_db()
+
+    threading.Thread(
+        target=scheduler_loop,
+        daemon=True
+    ).start()
+
 
 uvicorn.run(
     "server:app",
