@@ -222,15 +222,27 @@ def root():
 
 def scheduler_loop():
 
-    orchestrator = Orchestrator()
-
     def collect_news_job():
+
         print("[Scheduler] Running collect_news...")
-        orchestrator.collect_news()
+
+        orchestrator = Orchestrator()
+
+        try:
+            orchestrator.collect_news()
+        finally:
+            orchestrator.db.close()
 
     def send_digest_job():
+
         print("[Scheduler] Running send_digest...")
-        orchestrator.send_digest()
+
+        orchestrator = Orchestrator()
+
+        try:
+            orchestrator.send_digest()
+        finally:
+            orchestrator.db.close()
 
     schedule.every(5).minutes.do(collect_news_job)
     schedule.every(6).minutes.do(send_digest_job)
