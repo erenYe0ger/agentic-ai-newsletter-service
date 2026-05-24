@@ -44,3 +44,6 @@ docker-data/
 # --- xtras ---
 tree.py
 recipients.json
+credentials.json
+generate_token.py
+token.pickle
