@@ -57,6 +57,8 @@ class Orchestrator:
         # Determine today's database table
         table_name: str = self.repo.get_today_table()
 
+        self.repo.create_table_if_not_exists(table_name)
+
         for url in feeds:
 
             items: list[dict[str, Any]] = self.rss_service.fetch(url)

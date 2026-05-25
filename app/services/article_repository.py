@@ -25,6 +25,24 @@ class ArticleRepository:
         today: str = datetime.datetime.now(datetime.UTC).strftime("%d_%m_%Y")
         return f"articles_{today}"
     
+    def create_table_if_not_exists(self, table_name: str) -> None:
+
+        self.db.execute(
+            text(
+                f"""
+                CREATE TABLE IF NOT EXISTS {table_name} (
+                    id SERIAL PRIMARY KEY,
+                    title TEXT NOT NULL,
+                    link TEXT UNIQUE NOT NULL,
+                    summary TEXT NOT NULL,
+                    similarity_score FLOAT,
+                    published_at TIMESTAMP
+                )
+                """
+            )
+        )
+
+        self.db.commit()
 
     def upsert_article(
         self,
