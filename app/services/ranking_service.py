@@ -12,10 +12,12 @@ class RankingService:
     to prioritize important AI developments.
     """
 
+    MODEL = SentenceTransformer("all-MiniLM-L6-v2")
+
     def __init__(self) -> None:
 
         # Lightweight embedding model (~90MB)
-        self.model: SentenceTransformer = SentenceTransformer("all-MiniLM-L6-v2")
+        self.model: SentenceTransformer = MODEL
 
         # Reference context representing the type of articles we prefer
         self.reference_text: str = """
