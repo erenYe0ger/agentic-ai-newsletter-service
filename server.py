@@ -244,8 +244,8 @@ def scheduler_loop():
         finally:
             orchestrator.db.close()
 
-    schedule.every().day.at("00:00").do(collect_news_job)
-    schedule.every().day.at("02:30").do(send_digest_job)
+    schedule.every().day.at("08:45").do(collect_news_job)
+    schedule.every().day.at("09:15").do(send_digest_job)
 
     while True:
         schedule.run_pending()

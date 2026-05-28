@@ -17,7 +17,7 @@ class RankingService:
     def __init__(self) -> None:
 
         # Lightweight embedding model (~90MB)
-        self.model: SentenceTransformer = MODEL
+        self.model: SentenceTransformer = self.MODEL
 
         # Reference context representing the type of articles we prefer
         self.reference_text: str = """
