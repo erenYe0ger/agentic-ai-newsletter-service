@@ -11,7 +11,11 @@ if os.getenv("RENDER") is None:
 DATABASE_URL: str = os.getenv("DATABASE_URL")  # type: ignore
 
 # Create SQLAlchemy engine
-engine = create_engine(DATABASE_URL)
+engine = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True,
+    pool_recycle=300,
+)
 
 # Session factory used throughout the application
 # Provides database sessions for queries and transactions
